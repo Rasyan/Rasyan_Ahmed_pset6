@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "129837568833",
+    "firebase_url": "https://pset6-f4d93.firebaseio.com",
+    "project_id": "pset6-f4d93",
+    "storage_bucket": "pset6-f4d93.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:129837568833:android:a080f06268a7cfe0",
+        "android_client_info": {
+          "package_name": "rasyan_native_app.rasyan_ahmed_pset6"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "129837568833-3cjv0a4s7mk4knsttrhce578gfgnfvqr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "rasyan_native_app.rasyan_ahmed_pset6",
+            "certificate_hash": "8C7F58B78F9CA2DF02507299E6AAFF83F0AA4D93"
+          }
+        },
+        {
+          "client_id": "129837568833-tp2ne1ee1b4hpqqvjedmrm6uvof1jpqh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCpP_j672n8e_7cFh-kpxocfSoSfr8-JCc"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "129837568833-tp2ne1ee1b4hpqqvjedmrm6uvof1jpqh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
