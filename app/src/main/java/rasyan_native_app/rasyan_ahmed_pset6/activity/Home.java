@@ -1,6 +1,9 @@
 package rasyan_native_app.rasyan_ahmed_pset6.activity;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
@@ -22,6 +25,18 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.Objects;
+import java.util.Scanner;
 
 import rasyan_native_app.rasyan_ahmed_pset6.R;
 import rasyan_native_app.rasyan_ahmed_pset6.fragment.SearchFragment;
@@ -29,18 +44,20 @@ import rasyan_native_app.rasyan_ahmed_pset6.fragment.FavoritesFragment;
 import rasyan_native_app.rasyan_ahmed_pset6.fragment.FollowedFragment;
 import rasyan_native_app.rasyan_ahmed_pset6.fragment.CookbookFragment;
 import rasyan_native_app.rasyan_ahmed_pset6.fragment.AddFragment;
+import rasyan_native_app.rasyan_ahmed_pset6.other.Apigetter;
 import rasyan_native_app.rasyan_ahmed_pset6.other.CircleTransform;
 import rasyan_native_app.rasyan_ahmed_pset6.R;
 
 public class Home extends AppCompatActivity {
 
+    public static Context context;
     private NavigationView navigationView;
     private DrawerLayout drawer;
     private View navHeader;
     private ImageView imgNavHeaderBg, imgProfile;
     private TextView txtName, txtWebsite;
     private Toolbar toolbar;
-    private FloatingActionButton fab;
+//    private FloatingActionButton fab;
 
     // urls to load navigation header background image
     // and profile image
@@ -77,7 +94,7 @@ public class Home extends AppCompatActivity {
 
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         navigationView = (NavigationView) findViewById(R.id.nav_view);
-        fab = (FloatingActionButton) findViewById(R.id.fab);
+//        fab = (FloatingActionButton) findViewById(R.id.fab);
 
         // Navigation view header
         navHeader = navigationView.getHeaderView(0);
@@ -89,13 +106,13 @@ public class Home extends AppCompatActivity {
         // load toolbar titles from string resources
         activityTitles = getResources().getStringArray(R.array.nav_item_activity_titles);
 
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+//        fab.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
+//            }
+//        });
 
         // load nav menu header data
         loadNavHeader();
@@ -108,6 +125,9 @@ public class Home extends AppCompatActivity {
             CURRENT_TAG = TAG_SEARCH;
             loadHomeFragment();
         }
+
+        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this).build();
+        ImageLoader.getInstance().init(config);
     }
 
     /***
@@ -117,8 +137,8 @@ public class Home extends AppCompatActivity {
      */
     private void loadNavHeader() {
         // name, website
-        txtName.setText("Ravi Tamada");
-        txtWebsite.setText("www.androidhive.info");
+        //txtName.setText("Ravi Tamada");
+        //txtWebsite.setText("www.androidhive.info");
 
         // loading header background image
         Glide.with(this).load(urlNavHeaderBg)
@@ -127,12 +147,12 @@ public class Home extends AppCompatActivity {
                 .into(imgNavHeaderBg);
 
         // Loading profile image
-        Glide.with(this).load(urlProfileImg)
-                .crossFade()
-                .thumbnail(0.5f)
-                .bitmapTransform(new CircleTransform(this))
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .into(imgProfile);
+//        Glide.with(this).load(urlProfileImg)
+//                .crossFade()
+//                .thumbnail(0.5f)
+//                .bitmapTransform(new CircleTransform(this))
+//                .diskCacheStrategy(DiskCacheStrategy.ALL)
+//                .into(imgProfile);
     }
 
     /***
@@ -152,7 +172,7 @@ public class Home extends AppCompatActivity {
             drawer.closeDrawers();
 
             // show or hide the fab button
-            toggleFab();
+//            toggleFab();
             return;
         }
 
@@ -179,7 +199,7 @@ public class Home extends AppCompatActivity {
         }
 
         // show or hide the fab button
-        toggleFab();
+//        toggleFab();
 
         //Closing drawer on item click
         drawer.closeDrawers();
@@ -187,11 +207,10 @@ public class Home extends AppCompatActivity {
         // refresh toolbar menu
         invalidateOptionsMenu();
     }
-
     private Fragment getHomeFragment() {
         switch (navItemIndex) {
             case 0:
-                SearchFragment searchFragment = new SearchFragment();
+                Fragment searchFragment = new SearchFragment();
                 return searchFragment;
             case 1:
                 FavoritesFragment favoritesFragment = new FavoritesFragment();
@@ -367,11 +386,59 @@ public class Home extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    // show or hide the fab
-    private void toggleFab() {
-        if (navItemIndex == 0)
-            fab.show();
-        else
-            fab.hide();
+    public void changeFragment(int nav, String title, String image, String link,
+                               String score, String[] ingredients) {
+        Fragment fragment = null;
+        switch (nav) {
+            //Replacing the main content with ContentFragment Which is our Inbox View;
+            case 0:
+                navItemIndex = 0;
+                CURRENT_TAG = TAG_SEARCH;
+                break;
+            case 1:
+                navItemIndex = 1;
+                CURRENT_TAG = TAG_FAVO;
+                break;
+            case 2:
+                navItemIndex = 2;
+                CURRENT_TAG = TAG_FOLLOW;
+                fragment = FollowedFragment.newInstance(title, image, link, score, ingredients);
+                break;
+            case 3:
+                navItemIndex = 3;
+                CURRENT_TAG = TAG_COOKBOOK;
+                break;
+            case 4:
+                navItemIndex = 4;
+                CURRENT_TAG = TAG_ADD;
+                break;
+                    /*case R.id.nav_about_us:
+                        // launch new intent instead of loading fragment
+                        startActivity(new Intent(MainActivity.this, AboutUsActivity.class));
+                        drawer.closeDrawers();
+                        return true;
+                    case R.id.nav_privacy_policy:
+                        // launch new intent instead of loading fragment
+                        startActivity(new Intent(MainActivity.this, PrivacyPolicyActivity.class));
+                        drawer.closeDrawers();
+                        return true;*/
+            default:
+                navItemIndex = 0;
+        }
+        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.setCustomAnimations(android.R.anim.fade_in,
+                android.R.anim.fade_out);
+        fragmentTransaction.replace(R.id.frame, fragment, CURRENT_TAG);
+        fragmentTransaction.commitAllowingStateLoss();
     }
+
+
+
+    // show or hide the fab
+//    private void toggleFab() {
+//        if (navItemIndex == 0)
+//            fab.show();
+//        else
+//            fab.hide();
+//    }
 }

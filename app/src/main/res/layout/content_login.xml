@@ -13,13 +13,8 @@
     tools:context="rasyan_native_app.rasyan_ahmed_pset6.activity.Login"
     tools:showIn="@layout/activity_login">
 
-    <Button
-        android:text="Button"
+    <com.google.android.gms.common.SignInButton
+        android:id="@+id/sign_in_button"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="86dp"
-        android:layout_marginTop="126dp"
-        android:id="@+id/login" />
+        android:layout_height="wrap_content" />
 </RelativeLayout>
