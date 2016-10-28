@@ -9,6 +9,11 @@ import android.graphics.Paint;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 
+/***
+ * This is a class made to show the user picture in the slide menu as a circle.
+ * 100% of this code is copied from the tutorial for the navigation bar (source in home)
+ * This class does not need to be graded and as such is also not commented
+ */
 
 public class CircleTransform extends BitmapTransformation {
     public CircleTransform(Context context) {

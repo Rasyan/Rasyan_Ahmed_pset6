@@ -3,13 +3,9 @@ package rasyan_native_app.rasyan_ahmed_pset6.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
@@ -29,13 +25,20 @@ import com.google.firebase.auth.GoogleAuthProvider;
 
 import rasyan_native_app.rasyan_ahmed_pset6.R;
 
+
+
+/***
+ * This is the other activity of the app, and also the starting activity.
+ * this activity handles all of the code to login in the user and log out.
+ * done by following the tutorial at  : https://firebase.google.com/docs/auth/android/google-signin
+ * This file is lightly commented as most of the code below is directly copied from the tutorial
+ */
 public class Login extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
     private FirebaseAuth mFirebaseAuth;
     private FirebaseUser mFirebaseUser;
     private int RC_SIGN_IN = 1;
     private GoogleApiClient mGoogleApiClient;
     private FirebaseAuth.AuthStateListener mAuthListener;
-    private String TAG = "test";
     private String mUsername;
     private String mPhotoUrl = null;
 
@@ -47,17 +50,17 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        Intent intent = new Intent(Login.this,Home.class);
-        startActivity(intent);
-        finish();
-
+        // connect to firebase
         mFirebaseAuth = FirebaseAuth.getInstance();
         mFirebaseUser = mFirebaseAuth.getCurrentUser();
 
-        if (mFirebaseUser != null) {
-            goToHome();
+        // if you have the extra logout then you have been send here by the logout button on the slide menu.
+        // in that case you first need to log out.
+        if (getIntent().hasExtra("logout")) {
+            signOut();
         }
 
+        // integrate google sign in into the app
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
@@ -71,11 +74,9 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
                 .build();
 
 
-
+        // create the sign in button which signs you in when clicked upon
         SignInButton signInButton = (SignInButton) findViewById(R.id.sign_in_button);
-        signInButton.setSize(SignInButton.SIZE_STANDARD);
-        //signInButton.setScopes(gso.getScopeArray());
-
+        signInButton.setSize(SignInButton.SIZE_WIDE);
         signInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -83,6 +84,7 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
             }
         });
 
+        // the listener for any authentication state changes, this is called when you sign in or off.
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
@@ -90,15 +92,12 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
                 if (mFirebaseUser != null) {
                     // User is signed in
                     goToHome();
-                    Log.d(TAG, "onAuthStateChanged:signed_in:" + mFirebaseUser.getUid());
+
                 } else {
                     // User is signed out
-                    Log.d(TAG, "onAuthStateChanged:signed_out");
                 }
-                // ...
             }
         };
-        // ...
     }
 
     @Override
@@ -115,21 +114,18 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
         }
     }
 
-        /*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(Login.this,Home.class);
-                startActivity(intent);
-            }
-        });*/
-
-
     private void signIn() {
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
+    // signs out of firebase
+    private void signOut() {
+        mFirebaseAuth.signOut();
+        mUsername = null;
+    }
+
+    // handles the signing in.
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -138,35 +134,29 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
         if (requestCode == RC_SIGN_IN) {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             if (result.isSuccess()) {
-                // Google Sign In was successful, authenticate with Firebase
                 GoogleSignInAccount account = result.getSignInAccount();
                 firebaseAuthWithGoogle(account);
             } else {
-                // Google Sign In failed, update UI appropriately
-                // ...
+
             }
         }
     }
 
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
-        Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
 
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         mFirebaseAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
 
                         // If sign in fails, display a message to the user. If sign in succeeds
                         // the auth state listener will be notified and logic to handle the
                         // signed in user can be handled in the listener.
                         if (!task.isSuccessful()) {
-                            Log.w(TAG, "signInWithCredential", task.getException());
                             Toast.makeText(Login.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
                         }
-                        // ...
                     }
                 });
     }
@@ -176,6 +166,7 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
 
     }
 
+    // produces an intent to go to the home activity. also passes along the name and img of the user.
     private void goToHome() {
         mUsername = mFirebaseUser.getDisplayName();
         if (mFirebaseUser.getPhotoUrl() != null) {
@@ -184,23 +175,9 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
         Intent intent = new Intent(this, Home.class);
         intent.putExtra("user",mUsername);
         intent.putExtra("photo", mPhotoUrl);
+
+        // the flag below prevents this activity from entering the back stack.
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
-        finish();
     }
-
-
-    // logout
-    /*public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.sign_out_menu:
-                mFirebaseAuth.signOut();
-                Auth.GoogleSignInApi.signOut(mGoogleApiClient);
-                mUsername = ANONYMOUS;
-                startActivity(new Intent(this, SignInActivity.class));
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }*/
-
 }

@@ -1,24 +1,27 @@
 package rasyan_native_app.rasyan_ahmed_pset6.other;
 
-import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.nostra13.universalimageloader.core.ImageLoader;
+import java.util.ArrayList;
 
 import rasyan_native_app.rasyan_ahmed_pset6.R;
 
-public class FollowAdapter extends RecyclerView.Adapter<FollowAdapter.ViewHolder> {
+/***
+ * An adapter class that fills the recyclerlists in the Recipe fragment.
+ * it shows a list of ingredient names
+ */
 
-    private String[] ingredients;
+public class IngredientsAdapter extends RecyclerView.Adapter<IngredientsAdapter.ViewHolder> {
 
-    public FollowAdapter(String[] ingredients){
+    private ArrayList<String> ingredients;
+
+    // constructor
+    public IngredientsAdapter(ArrayList<String> ingredients){
         this.ingredients = ingredients;
-        //System.out.println("adapterTEST ");
     }
 
     // make the viewholder
@@ -31,23 +34,24 @@ public class FollowAdapter extends RecyclerView.Adapter<FollowAdapter.ViewHolder
 
         }
     }
-    // choose single_view as viewholder
+    // choose single_text as viewholder
     @Override
-    public FollowAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int position) {
+    public IngredientsAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int position) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.single_text, parent, false);
         ViewHolder vh = new ViewHolder(view);
         return vh;
     }
 
+    // set the text
     @Override
-    public void onBindViewHolder(FollowAdapter.ViewHolder vh, int i) {
-        vh.myText.setText(ingredients[i]);
+    public void onBindViewHolder(IngredientsAdapter.ViewHolder vh, int i) {
+        vh.myText.setText(ingredients.get(i));
     }
 
     @Override
     public int getItemCount() {
         if (ingredients != null) {
-            return ingredients.length;
+            return ingredients.size();
         } else {
             return 0;
         }

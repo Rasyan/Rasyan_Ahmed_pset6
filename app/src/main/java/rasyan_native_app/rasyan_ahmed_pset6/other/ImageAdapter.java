@@ -11,22 +11,31 @@ import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 
+import java.util.ArrayList;
+
 import rasyan_native_app.rasyan_ahmed_pset6.R;
 
-public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder> {
+/***
+ * An adapter class that fills the recyclerlists in search and favorites fragments.
+ * It shows an image and a text view.
+ */
+
+public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> {
 
     private Context context;
-    private String[] images;
-    private String[] names;
+    private ArrayList<String> images;
+    private ArrayList<String> names;
+    private ArrayList<String> ids;
     private View.OnClickListener listener;
     private ImageLoader imageLoader = ImageLoader.getInstance();
     private Activity activity;
 
-    public SearchAdapter(String[] names, String[] imageURLs, final String[] ids, final Activity activity){
-        this.images = imageURLs;
-        this.names = names;
-        this.activity = activity;
-        System.out.println("adapterTEST ");
+    // constructor
+    public ImageAdapter(ArrayList<String> titles, ArrayList<String> imageURLs, ArrayList<String> id, Activity act){
+        images = imageURLs;
+        names = titles;
+        ids = id;
+        activity = act;
 
         // if an item in the list is clicked, go to its info page
         listener = new View.OnClickListener() {
@@ -34,7 +43,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
             public void onClick(View view){
                 int position = ((ViewGroup) view.getParent()).indexOfChild(view);
                 Apigetter getter = new Apigetter(activity);
-                getter.execute("id",ids[position]);
+                getter.execute("id",ids.get(position));
             }
         };
     }
@@ -52,28 +61,38 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
     }
     // choose single_view as viewholder
     @Override
-    public SearchAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int position) {
+    public ImageAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int position) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.single_view, parent, false);
         ViewHolder vh = new ViewHolder(view);
         context = view.getContext();
         return vh;
     }
 
+    // set the text and listener for this view, if an image is provided, update that image
     @Override
-    public void onBindViewHolder(SearchAdapter.ViewHolder vh, int i) {
-        vh.myName.setText(names[i]);
+    public void onBindViewHolder(ImageAdapter.ViewHolder vh, int i) {
+        vh.myName.setText(names.get(i));
         vh.itemView.setOnClickListener(listener);
-        if (!images[i].equals("N/A")){
-            imageLoader.displayImage(images[i], vh.myPhoto);
+        if (!images.get(i).equals("N/A")){
+            imageLoader.displayImage(images.get(i), vh.myPhoto);
         }
     }
+
 
     @Override
     public int getItemCount() {
         if (names != null) {
-            return names.length;
+            return names.size();
         } else {
             return 0;
         }
+    }
+
+    // this method is called when the recyclerview needs to be updated with new data. this is only done in the search fragment
+    public void swap(ArrayList<String> names, ArrayList<String> imageURLs, ArrayList<String> id) {
+        this.images = imageURLs;
+        this.names = names;
+        this.ids = id;
+        notifyDataSetChanged();
     }
 }

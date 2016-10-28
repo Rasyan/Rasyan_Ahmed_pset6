@@ -8,27 +8,14 @@
         <item
             android:id="@+id/nav_my_favorites"
             android:title="@string/nav_my_favorites" />
-        <item
-            android:id="@+id/nav_followed_cooks"
-            android:title="@string/nav_followed_cooks" />
 
-        <item
-            android:id="@+id/nav_my_cookbook"
-            android:title="@string/nav_my_cookbook" />
-
-        <item
-            android:id="@+id/nav_add_recipe"
-            android:title="@string/nav_add_recipe" />
     </group>
 
     <item android:title="Other">
         <menu>
             <item
-                android:id="@+id/nav_about_us"
-                android:title="@string/nav_about_us" />
-            <item
-                android:id="@+id/nav_privacy_policy"
-                android:title="@string/privacy_policy" />
+                android:id="@+id/nav_logout"
+                android:title="@string/nav_logout" />
         </menu>
     </item>
 

@@ -1,5 +1,6 @@
 package rasyan_native_app.rasyan_ahmed_pset6.fragment;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -9,83 +10,85 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+
+import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
+
+import org.w3c.dom.Text;
+
+import java.util.ArrayList;
 
 import rasyan_native_app.rasyan_ahmed_pset6.R;
-import rasyan_native_app.rasyan_ahmed_pset6.activity.Home;
 import rasyan_native_app.rasyan_ahmed_pset6.other.Apigetter;
-import rasyan_native_app.rasyan_ahmed_pset6.other.SearchAdapter;
+import rasyan_native_app.rasyan_ahmed_pset6.other.ImageAdapter;
+
+import static rasyan_native_app.rasyan_ahmed_pset6.activity.Home.context;
 
 /**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {link SearchFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link SearchFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * a fragment that shows a list of recipes.
+ * by default it shows a list of the currently trending items,
+ * when the floating action button is pressed a dialog shows up where the user can input its search query,
+ * ApiGetter processes that query and the list shown here gets refreshed with the new results.
  */
 public class SearchFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
     private RecyclerView mRecyclerView;
-    public SearchAdapter mAdapter;
+    public static ImageAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private FloatingActionButton fab;
+    private static ArrayList<String> titles;
+    private static ArrayList<String> images;
+    private static ArrayList<String> ids;
+    public static boolean searching;
+    private static String search;
 
-//    private OnFragmentInteractionListener mListener;
 
     public SearchFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment SearchFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static SearchFragment newInstance(String param1, String param2) {
-        SearchFragment fragment = new SearchFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setUpRecyclerView();
+
+        // if you are showing a search request:
+        if (searching) {
+
+            // set the title
+            TextView title = (TextView) view.findViewById(R.id.text);
+            title.setText("Searching for: " + search);
+
+            // and show the search results
+            mAdapter.swap(titles, images, ids);
+        } else {
+
+            // set the title
+            TextView title = (TextView) view.findViewById(R.id.text);
+            title.setText("Currently Trending recipes");
+
+            // get the trending list.
+            Apigetter getter = new Apigetter(getActivity());
+            getter.execute("trending");
+        }
+
+        // show the dialog fragment where the user can input its search query
         fab = (FloatingActionButton) getView().findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //((Home)getActivity()).dosearch();
-                Apigetter getter = new Apigetter(getActivity()) ;
-                getter.execute("search","shredded chicken");
+                android.app.DialogFragment newFragment = PopupFragment.newInstance();
+                newFragment.show(getActivity().getFragmentManager(), "searchDialog");
             }
         });
     }
 
+    // create the view
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -93,66 +96,31 @@ public class SearchFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_search, container, false);
     }
 
+    // set up the recycler view, it starts out empty
     private void setUpRecyclerView() {
         mRecyclerView = (RecyclerView) getView().findViewById(R.id.list);
 
         // this line below adds a divider between the recyclerView items,
         // requires a dependency.
         // source : https://github.com/yqritc/RecyclerView-FlexibleDivider
-        //mRecyclerView.addItemDecoration(new HorizontalDividerItemDecoration.Builder(Home.context).build());
+        mRecyclerView.addItemDecoration(new HorizontalDividerItemDecoration.Builder(getActivity()).color(Color.BLACK).build());
 
 
         // use a linear layout manager
-        mLayoutManager = new LinearLayoutManager(Home.context);
+        mLayoutManager = new LinearLayoutManager(context);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        // use the adapter
-        String[] name = new String[1];
-        name[0] = "Chicken and Quinoa Burritos";
-        String[] pic = new String[1];
-        pic[0] = "http://static.food2fork.com/chickenquinoaburritos2_300bc3abd30.jpg";
-        String[] id = new String[1];
-        id[0] = "37258";
-        mAdapter = new SearchAdapter(name,pic,id,getActivity());
+        // create an empty adapter.
+        mAdapter = new ImageAdapter(null,null,null,getActivity());
         mRecyclerView.setAdapter(mAdapter);
     }
 
-    /*// TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }*/
-
-    /*@Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
+    // this method is accessed from the apigetter, it sets data in this class and tells the adapter to refresh the list.
+    public static void refresh(ArrayList<String> names, ArrayList<String> imageURLs, ArrayList<String> id, String query) {
+        titles = names;
+        images = imageURLs;
+        ids = id;
+        search = query;
+        mAdapter.swap(names,imageURLs,id);
     }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }*/
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    /*public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
-    }*/
 }
